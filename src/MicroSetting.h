@@ -44,6 +44,11 @@ class MicroSetting {
     int range;
     int value;
     const char ** labels = 0;
+    int signedIntModulo(int value, int modulo) {
+        while ( value < 0 ) value += modulo;
+        return (value % modulo);
+    }
+
   public:
 
     PuppeteerSetting(int start, int range) {
@@ -60,7 +65,9 @@ class MicroSetting {
       this->range = range;
       this->labels = labels;
     }
-    
+    void move(int amount) {
+      value = constrain( value + amount, start, start+range);
+    }
     void rotate(int amount) {
       value = signedIntModulo(value + amount - start, range ) + start;
     }
