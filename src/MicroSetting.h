@@ -51,16 +51,16 @@ class MicroSetting {
 
   public:
 
-    PuppeteerSetting(int start, int range) {
+    MicroSetting(int start, int range) {
       this->start = start;    
       this->range = range;
       this->value = start;
     }
-    PuppeteerSetting(int range) {
+    MicroSetting(int range) {
       this->start = 0;
       this->range = range;
     }
-    PuppeteerSetting(int range,const char ** labels) {
+    MicroSetting(int range,const char ** labels) {
       this->start = 0;
       this->range = range;
       this->labels = labels;
