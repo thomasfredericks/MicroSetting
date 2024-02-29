@@ -1,10 +1,19 @@
+
+#ifdef ESP32
+#include <Preferences.h>
+#endif
+
 class MicroSetting {
 
   int start;
   int range;
   int value;
+  int defaultValue;
   const char ** labels = 0;
   const char * name ;
+
+// void initializeAsInt();
+// void initializeAsLabeled();
 
 public:
 
@@ -13,21 +22,29 @@ public:
     return (value % modulo);
   }
 
-  MicroSetting(const char * settingName, int startValue, int valueRange) {
+  MicroSetting(const char * settingName, int startValue, int valueRange, int startValue) {
     name = settingName;
     start = startValue;
     range = valueRange;
+    defaultValue = startValue;
+    setInt(startValue);
   }
-  MicroSetting(const char * settingName, int valueRange) {
+
+  MicroSetting(const char * settingName, int valueRange, int startValue) {
     name = settingName;
     start = 0;
     range = valueRange;
+    defaultValue = startValue;
+    setInt(startValue);
   }
-  MicroSetting(const char * settingName, int labelCount, const char ** settingLabels) {
+  
+  MicroSetting(const char * settingName, int labelCount, const char ** settingLabels, int startIndex) {
     name = settingName;
     start = 0;
     range = labelCount;
     labels = settingLabels;
+    defaultValue = startValue;
+    setInt(startValue);
   }
 
   const char * getName() {
@@ -56,6 +73,15 @@ public:
   void setInt(int i) {
     value = constrain(i, start, start + range); // NOT SURE IF THIS IS RIGHT...
   }
+#ifdef ESP32
+  void storeIn(Preferences preferences) {
+    preferences->putInt(name, value);
+  }
+
+  void restoreFrom(Preferences preferences) {
+    setInt(preferences->getInt(name, value, startValue));
+  }
+#endif
 
 };
 
@@ -68,7 +94,7 @@ class MicroSettingContainer {
   MicroSetting ** settings = 0;
 
 public:
- 
+
   void rotate(int amount) {
     current = MicroSetting::signedIntModulo(current + amount, count);
   }
@@ -80,15 +106,32 @@ public:
     this->name = name;
   }
   */
-  MicroSettingContainer(const char * containerName, size_t microSettingArrayCount, MicroSetting ** microSettingArray) {
+  void setCurrent(int index) {
+    current = MicroSetting::signedIntModulo(index, count);
+  }
+
+  MicroSettingContainer(const char * containerName, size_t microSettingArrayCount, MicroSetting ** microSettingArray, int startIndex) {
     name = containerName;
     settings = microSettingArray;
     count = microSettingArrayCount;
+    setCurrent(startIndex);
   }
   const char * getName() {
     return name;
   }
-  void setCurrent(int index) {
-    current = MicroSetting::signedIntModulo(index, count);
+
+#ifdef ESP32
+  void storeIn(Preferences preferences) {
+    for (int i = 0; i < count; i++) {
+      settings[i]->storeIn(preferences);
+    }
   }
+
+  void restoreFrom(Preferences preferences) {
+    for (int i = 0; i < count; i++) {
+      settings[i]->restoreFrom(preferences);
+    }
+  }
+#endif
 };
+
