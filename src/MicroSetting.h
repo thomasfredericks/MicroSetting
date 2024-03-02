@@ -1,14 +1,5 @@
 
-/*
-menu.trigger();
-menu.rotate();
 
-menuItem {
-  name =
-  type  = 's' / c
-}
-
-*/
 
 #ifndef LOG
 #define LOG(...)
@@ -129,18 +120,7 @@ public:
       break;
     }
   }
-  /*
-  static void storeArrayTo(int arrayCount, MicroSetting ** settingArray, Preferences * preferences ) {
-    for ( int i = 0; i < arrayCount; i++) {
-      settingArray[i]->storeTo(preferences);
-    }
-  }
-  static void restoreArrayFrom(int arrayCount, MicroSetting ** settingArray, Preferences * preferences ) {
-    for ( int i = 0; i < arrayCount; i++) {
-      settingArray[i]->restoreFrom(preferences);
-    }
-  }
-  */
+
 
 #endif
 };
@@ -202,121 +182,3 @@ public:
   }
 #endif
 };
-/*
-// ===================================================
-class MicroSettingInt : public MicroSetting {
-
-protected:
-
-
-// void initializeAsInt();
-// void initializeAsLabeled();
-
-public:
-
-  virtual void rotate(int amount) override {
-    value = MicroSetting::signedIntModulo(value + amount - start, range ) + start;
-  }
-
-  void setInt(int i) {
-    value = constrain(i, start, start + range); // NOT SURE IF THIS IS RIGHT...
-  }
-
-
-  MicroSettingInt(const char * settingName, int rangeStart, int valueRange, int defaultValue) : MicroSetting(settingName) {
-    start = rangeStart;
-    range = valueRange;
-    this->defaultValue = defaultValue;
-    setInt(defaultValue);
-  }
-
-
-  int getInt() {
-    return value;
-  }
-
-  virtual void printTo(Print * printer) override {
-    printer->print(value);
-  }
-
-#ifdef ESP32
-  virtual void storeTo(Preferences * preferences) {
-    preferences->putInt(name, value);
-  }
-  virtual void restoreFrom(Preferences * preferences) {
-    preferences->getInt(name, defaultValue);
-  }
-
-#endif
-};
-
-
-// ===================================================
-class MicroSettingIntLabeled : public MicroSettingInt {
-  const char ** labels = 0;
-
-public:
-  const char * getLabel() {
-    return labels[value];
-  }
-  virtual void printTo(Print * printer) override {
-    printer->print(labels[value]);
-  };
-  MicroSettingIntLabeled(const char * settingName, int labelCount, const char ** settingLabels, int startIndex) : MicroSettingInt(settingName, 0, labelCount, startIndex) {
-    labels = settingLabels;
-  }
-};
-*/
-/*
-// ===================================================
-template <typename T>
-class MicroSettingContainer {
-
-  size_t count;
-  size_t current;
-  const char * name ;
-  T ** settings = 0;
-
-public:
-
-  void rotate(int amount) {
-    current = MicroSetting::signedIntModulo(current + amount, count);
-  }
-  T * getCurrent() {
-    return settings[current];
-  }
-
-  void setIndex(int index) {
-    current = constrain(index, 0, count);
-  }
-
-  int getIndex(){
-    return current;
-  }
-
-  MicroSettingContainer(const char * containerName, size_t microSettingArrayCount, T ** microSettingArray, int defaultIndex) {
-    name = containerName;
-    settings = microSettingArray;
-    count = microSettingArrayCount;
-    setIndex(defaultIndex);
-  }
-  const char * getName() {
-    return name;
-  }
-
-#ifdef ESP32
-  void storeTo(Preferences * preferences) {
-    for (int i = 0; i < count; i++) {
-      settings[i]->storeTo(preferences);
-    }
-  }
-
-  void restoreFrom(Preferences * preferences) {
-    for (int i = 0; i < count; i++) {
-      settings[i]->restoreFrom(preferences);
-    }
-  }
-#endif
-};
-
-*/
