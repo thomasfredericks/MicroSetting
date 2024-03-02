@@ -3,7 +3,7 @@
 
 #ifndef LOG
 #define LOG(...)
-#endif  
+#endif
 
 
 #ifdef ESP32
@@ -16,12 +16,18 @@
 
 // ===================================================
 class MicroSetting {
+public:
+  enum levels {
+    KEY,
+    VALUE
+  };
+
 protected:
   const char * name_;
-  int intMin_;
-  int intRange_;
-  int intValue_;
-  char type_;
+  int intMin_ = 0;
+  int intRange_ = 1;
+  int intValue_ = 0;
+  char type_ = 'n'; // none
   const char ** labels_ = 0;
 
 public:
@@ -74,6 +80,11 @@ public:
     return intValue_;
   }
 
+  MicroSetting(const char * name) {
+    name_ = name;
+    type_ = 'n'; // none/nill
+  }
+
 
   MicroSetting(const char * name, int min, int range) {
     name_ = name;
@@ -93,7 +104,7 @@ public:
 
   MicroSetting(const char * name, const char ** labels, int count) {
     name_ = name;
-    type_ = 'e';
+    type_ = 'e'; //enum
     labels_ = labels;
     intMin_ = 0;
     intRange_ = count;
@@ -101,7 +112,7 @@ public:
   }
 
 #ifdef ESP32
-  public:
+public:
   virtual void storeTo(Preferences * preferences) {
 
     switch (type_) {
@@ -131,12 +142,38 @@ class MicroSettingGroup {
   size_t current_;
   const char * name_ ;
   MicroSetting ** settings_ = 0;
-
+  MicroSetting::levels level_ = MicroSetting::KEY; //key or value
+/*
+  enum {
+    kIntMenuNone,
+    kMSGKeyEntered,
+    kMSGValueChanged
+  } status_ = kIntMenuNone;
+*/
 public:
 
   void rotate(int amount) {
-    current_ = MicroSetting::signedIntModulo(current_ + amount, count_);
+    if ( level_ == MicroSetting::KEY) current_ = MicroSetting::signedIntModulo(current_ + amount, count_);
+    else settings_[current_]->rotate(amount);
   }
+
+  void toggleLevel() {
+    if ( level_ == MicroSetting::KEY) level_ = MicroSetting::VALUE ;
+    else level_ = MicroSetting::KEY;
+  }
+/*
+  bool settingEntered() {
+    return status_ == kIntMenuTrigger;
+  }
+  bool valueChanged() {
+    return status_ == kMSGValueChanged;
+  }
+  */
+  int getLevel() {
+    return level_;
+  }
+
+  // shouldRename to getCurrentSetting
   MicroSetting * getCurrent() {
     return settings_[current_];
   }
@@ -152,7 +189,7 @@ public:
   void printEachTo(Print * printer, char * valueSeparator, char * settingSeparator)  {
     for (int i = 0; i < count_; i++) {
       if ( i && settingSeparator) printer->print(settingSeparator);
-      
+
       settings_[i]->printTo(printer, valueSeparator);
     }
   }
