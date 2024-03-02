@@ -20,7 +20,11 @@ void setup() {
 }
 
 void loop() {
-  Serial.println();
+  Serial.println("------------");
+  Serial.println("Rotating setting values");
+  labeledSetting.rotate(1);
+  intSetting.rotate(1);
+  Serial.println("------------");
 
   // put your main code here, to run repeatedly:
   Serial.println("Group contents:");
@@ -41,10 +45,7 @@ void loop() {
 
   delay(2000);
   
-  Serial.println("Rotating setting values");
-  labeledSetting.rotate(1);
-  intSetting.rotate(1);
-  Serial.println();
+
 
 
 }
