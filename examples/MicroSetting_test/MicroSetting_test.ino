@@ -4,11 +4,11 @@
 
 Preferences preferences;
 
-MicroSetting intSetting = MicroSetting("int", 0, 255, 127);
+MicroSetting intSetting = MicroSetting("Int", 0, 255, 127);
 
 enum labeledSettingEnum { ABC, DEF, GHI };
 const char* labeledSettingLabels[3] = { "ABC", "DEF", "GHI"};
-MicroSetting labeledSetting = MicroSetting("Type", labeledSettingLabels, SIZE_OF_ARRAY(labeledSettingLabels));
+MicroSetting labeledSetting = MicroSetting("Labeled", labeledSettingLabels, SIZE_OF_ARRAY(labeledSettingLabels));
 
 MicroSetting * groupArray[2] = { &intSetting, &labeledSetting };
 MicroSettingGroup groupSetting = MicroSettingGroup("Group", groupArray, SIZE_OF_ARRAY(groupArray));
@@ -20,9 +20,12 @@ void setup() {
 }
 
 void loop() {
+  Serial.println();
+
   // put your main code here, to run repeatedly:
   Serial.println("Group contents:");
   groupSetting.printEachTo(&Serial, "=", "\n");
+  Serial.println();
   Serial.println("------------");
   
   Serial.println("labeledSetting:");
@@ -36,11 +39,12 @@ void loop() {
   Serial.println( intSetting.getInt() );
   Serial.println("------------");
 
-  delay(1000);
+  delay(2000);
   
   Serial.println("Rotating setting values");
   labeledSetting.rotate(1);
   intSetting.rotate(1);
+  Serial.println();
 
 
 }
