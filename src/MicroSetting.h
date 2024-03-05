@@ -30,6 +30,7 @@ protected:
   char type_ = 'n'; // none
   const char ** labels_ = 0;
 
+
 public:
 
   const char * getName() {
@@ -67,12 +68,12 @@ public:
 
   }
 
-  void rotate(int amount)  {
-    intValue_ = MicroSetting::signedIntModulo(intValue_ + amount - intMin_, intRange_ ) + intMin_;
+  virtual void setInt(int i) {
+    intValue_ = MicroSetting::signedIntModulo(i - intMin_, intRange_ ) + intMin_;
   }
 
-  void setInt(int i) {
-    intValue_ = constrain(i, intMin_, intMin_ + intRange_); // NOT SURE IF THIS IS RIGHT...
+  void rotate(int amount)  {
+    setInt(intValue_+amount);
   }
 
 
@@ -127,7 +128,7 @@ public:
     switch (type_) {
     case 'e':
     case 'i' :
-      preferences->getInt(name_, intValue_);
+      setInt(preferences->getInt(name_, intValue_));
       break;
     }
   }
