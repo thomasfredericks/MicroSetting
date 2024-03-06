@@ -137,19 +137,13 @@ public:
 };
 
 class MicroSettingGroup {
-
+protected:
   size_t count_;
   size_t current_;
   const char * name_ ;
   MicroSetting ** settings_ = 0;
   MicroSetting::levels level_ = MicroSetting::KEY; //key or value
-/*
-  enum {
-    kIntMenuNone,
-    kMSGKeyEntered,
-    kMSGValueChanged
-  } status_ = kIntMenuNone;
-*/
+
 public:
 
   void rotate(int amount) {
