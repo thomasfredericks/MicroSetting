@@ -59,11 +59,9 @@ public:
   }
 
   void printTo(Print * printer, char * valueSeparator)  {
-
     printer->print(name_);
     if (valueSeparator) printer->print(valueSeparator);
     printValueTo(printer);
-
   }
 
   virtual void setInt(int i) {
@@ -71,7 +69,7 @@ public:
   }
 
   void rotate(int amount)  {
-    setInt(intValue_+amount);
+    setInt(intValue_ + amount);
   }
 
 
@@ -84,6 +82,13 @@ public:
     type_ = 'n'; // none/nill
   }
 
+  MicroSetting(const char * name, int range) {
+    name_ = name;
+    type_ = 'i';
+    intMin_ = 0;
+    intRange_ = range;
+    intValue_ = intMin_;
+  }
 
   MicroSetting(const char * name, int min, int range) {
     name_ = name;
@@ -135,6 +140,7 @@ public:
 #endif
 };
 
+
 class MicroSettingGroup {
 
   size_t count_;
@@ -150,22 +156,35 @@ public:
     else settings_[current_]->rotate(amount);
   }
 
+  void rotateSetting(int amount) {
+    current_ = MicroSetting::signedIntModulo(current_ + amount, count_);
+  }
+
+  void rotateValue(int amount) {
+    settings_[current_]->rotate(amount);
+  }
+
   void toggleLevel() {
     if ( level_ == MicroSetting::KEY) level_ = MicroSetting::VALUE ;
     else level_ = MicroSetting::KEY;
   }
-/*
-  bool settingEntered() {
-    return status_ == kIntMenuTrigger;
-  }
-  bool valueChanged() {
-    return status_ == kMSGValueChanged;
-  }
-  */
-  int getLevel() {
+  /*
+    bool settingEntered() {
+      return status_ == kIntMenuTrigger;
+    }
+    bool valueChanged() {
+      return status_ == kMSGValueChanged;
+    }
+    */
+  MicroSetting::levels getLevel() {
     return level_;
   }
 
+  void setLevel(MicroSetting::levels level) {
+
+    level_ = level;
+
+  }
   // shouldRename to getCurrentSetting
   MicroSetting * getCurrent() {
     return settings_[current_];
@@ -212,3 +231,5 @@ public:
   }
 #endif
 };
+
+
