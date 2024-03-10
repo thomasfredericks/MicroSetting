@@ -15,16 +15,12 @@
 // ===================================================
 class MicroSetting {
 public:
-  enum levels {
-    KEY,
-    VALUE
-  };
 
 protected:
   const char * name_;
-  int intMin_ = 0;
-  int intRange_ = 1;
-  int intValue_ = 0;
+  int32_t int_min_ = 0;
+  int32_t int_range_ = 1;
+  int32_t int_value_ = 0;
   char type_ = 'n'; // none
   const char ** labels_ = 0;
 
@@ -35,13 +31,13 @@ public:
     return name_;
   }
 
-  static int signedIntModulo(int value, int modulo) {
+  static int32_t signedIntModulo(int32_t value, int32_t modulo) {
     while ( value < 0 ) value += modulo;
     return (value % modulo);
   }
 
   const char * getLabel() {
-    if (labels_) return labels_[intValue_];
+    if (labels_) return labels_[int_value_];
     return "";
   }
 
@@ -50,10 +46,10 @@ public:
   void printValueTo(Print * printer)  {
     switch (type_) {
     case 'e':
-      printer->print(labels_[intValue_]);
+      printer->print(labels_[int_value_]);
       break;
     case 'i' :
-      printer->print(intValue_);
+      printer->print(int_value_);
       break;
     }
   }
@@ -64,17 +60,17 @@ public:
     printValueTo(printer);
   }
 
-  virtual void setInt(int i) {
-    intValue_ = MicroSetting::signedIntModulo(i - intMin_, intRange_ ) + intMin_;
+  virtual void setInt(int32_t i) {
+    int_value_ = MicroSetting::signedIntModulo(i - int_min_, int_range_ ) + int_min_;
   }
 
   void rotate(int amount)  {
-    setInt(intValue_ + amount);
+    setInt(int_value_ + amount);
   }
 
 
-  int getInt() {
-    return intValue_;
+  int32_t getInt() {
+    return int_value_;
   }
 
   MicroSetting(const char * name) {
@@ -85,53 +81,57 @@ public:
   MicroSetting(const char * name, int range) {
     name_ = name;
     type_ = 'i';
-    intMin_ = 0;
-    intRange_ = range;
-    intValue_ = intMin_;
+    int_min_ = 0;
+    int_range_ = range;
+    int_value_ = int_min_;
   }
 
-  MicroSetting(const char * name, int min, int range) {
+  MicroSetting(const char * name, int32_t min, int32_t range) {
     name_ = name;
     type_ = 'i';
-    intMin_ = min;
-    intRange_ = range;
-    intValue_ = intMin_;
+    int_min_ = min;
+    int_range_ = range;
+    int_value_ = int_min_;
   }
 
-  MicroSetting(const char * name, int min, int range, int start) {
+  MicroSetting(const char * name, int32_t min, int32_t range, int32_t start) {
     name_ = name;
     type_ = 'i';
-    intMin_ = min;
-    intRange_ = range;
-    intValue_ = start;
+    int_min_ = min;
+    int_range_ = range;
+    int_value_ = start;
   }
 
-  MicroSetting(const char * name, const char ** labels, int count) {
+  MicroSetting(const char * name, const char ** labels, int32_t count) {
     name_ = name;
     type_ = 'e'; //enum
     labels_ = labels;
-    intMin_ = 0;
-    intRange_ = count;
-    intValue_ = intValue_;
+    int_min_ = 0;
+    int_range_ = count;
+    int_value_ = int_value_;
   }
 
 #ifdef ESP32
 public:
-  virtual void storeTo(Preferences * preferences) {
 
+
+
+  virtual void putInPreferences(Preferences * preferences) {
     switch (type_) {
     case 'e':
     case 'i' :
-      preferences->putInt(name_, intValue_);
+      preferences->putInt(name_, int_value_);
       break;
     }
   }
-  virtual void restoreFrom(Preferences * preferences) {
+
+
+  virtual void getFromPreferences(Preferences * preferences) {
 
     switch (type_) {
     case 'e':
     case 'i' :
-      setInt(preferences->getInt(name_, intValue_));
+      setInt(preferences->getInt(name_, int_value_));
       break;
     }
   }
@@ -147,19 +147,22 @@ class MicroSettingGroup {
   size_t current_;
   const char * name_ ;
   MicroSetting ** settings_ = 0;
-  MicroSetting::levels level_ = MicroSetting::KEY; //key or value
+  //MicroSetting::levels level_ = MicroSetting::KEY; //key or value
 
 public:
 
   void rotate(int amount) {
+    /*
     if ( level_ == MicroSetting::KEY) current_ = MicroSetting::signedIntModulo(current_ + amount, count_);
     else settings_[current_]->rotate(amount);
+    */
+    settings_[current_]->rotate(amount);
   }
 
-  void rotateSetting(int amount) {
+  void rotateIndex(int amount) {
     current_ = MicroSetting::signedIntModulo(current_ + amount, count_);
   }
-
+/*
   void rotateValue(int amount) {
     settings_[current_]->rotate(amount);
   }
@@ -168,26 +171,23 @@ public:
     if ( level_ == MicroSetting::KEY) level_ = MicroSetting::VALUE ;
     else level_ = MicroSetting::KEY;
   }
-  /*
-    bool settingEntered() {
-      return status_ == kIntMenuTrigger;
-    }
-    bool valueChanged() {
-      return status_ == kMSGValueChanged;
-    }
-    */
+
   MicroSetting::levels getLevel() {
     return level_;
   }
 
   void setLevel(MicroSetting::levels level) {
-
     level_ = level;
-
   }
-  // shouldRename to getCurrentSetting
-  MicroSetting * getCurrent() {
+  */
+
+ 
+  MicroSetting * getCurrentSetting() {
     return settings_[current_];
+  }
+
+  MicroSetting * getSettingAtIndex(int index) {
+    return settings_[index];
   }
 
   void setIndex(int index) {
@@ -197,6 +197,15 @@ public:
   int getIndex() {
     return current_;
   }
+
+  const char * getName() {
+    return name_;
+  }
+
+  int getCount() {
+    return count_;
+  }
+
 
   void printEachTo(Print * printer, char * valueSeparator, char * settingSeparator)  {
     for (int i = 0; i < count_; i++) {
@@ -212,23 +221,24 @@ public:
     count_ = count;
     current_ = 0;
   }
-  const char * getName() {
-    return name_;
-  }
+
 
 #ifdef ESP32
-  void storeEachTo(Preferences * preferences) {
+
+  void putEachInPreferences(Preferences * preferences) {
     for (int i = 0; i < count_; i++) {
-      settings_[i]->storeTo(preferences);
+      LOG("Putting", i, settings_[i]->getName() );
+      settings_[i]->putInPreferences(preferences);
     }
   }
 
-  void restoreEachFrom(Preferences * preferences) {
+  void getEachFromPreferences(Preferences * preferences) {
     for (int i = 0; i < count_; i++) {
-      LOG("Restoring", i, settings_[i]->getName() );
-      settings_[i]->restoreFrom(preferences);
+      LOG("Getting", i, settings_[i]->getName() );
+      settings_[i]->getFromPreferences(preferences);
     }
   }
+
 #endif
 };
 
